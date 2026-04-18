@@ -1,10 +1,61 @@
 #include <iostream>
 using namespace std;
 
+// Check if number is safe
+bool isSafe(int grid[9][9], int row, int col, int num)
+{
+    for (int i = 0; i < 9; i++)
+        if (grid[row][i] == num)
+            return false;
+
+    for (int i = 0; i < 9; i++)
+        if (grid[i][col] == num)
+            return false;
+
+    int startRow = (row / 3) * 3;
+    int startCol = (col / 3) * 3;
+
+    for (int i = startRow; i < startRow + 3; i++)
+        for (int j = startCol; j < startCol + 3; j++)
+            if (grid[i][j] == num)
+                return false;
+
+    return true;
+}
+
+//  Solver
+bool solveSudoku(int grid[9][9])
+{
+    for (int i = 0; i < 9; i++)
+    {
+        for (int j = 0; j < 9; j++)
+        {
+            if (grid[i][j] == 0)
+            {
+                for (int k = 1; k <= 9; k++)
+                {
+                    if (isSafe(grid, i, j, k))
+                    {
+                        grid[i][j] = k;
+
+                        if (solveSudoku(grid))
+                            return true;
+
+                        grid[i][j] = 0; // backtrack
+                    }
+                }
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+// Print Grid
 void printGrid(int grid[9][9])
 {
-    cout << "        0   1    2  3   4   5   6   7   8  " << endl;
-    cout << "      +---+---+---+---+---+---+---+---+---+" << endl;
+    cout << "        0   1   2   3   4   5   6   7   8  " << endl;
+    cout << "------+-----------+-----------+-----------+" << endl;
     for (int i = 0; i < 9; i++)
     {
 
@@ -14,44 +65,28 @@ void printGrid(int grid[9][9])
             cout << grid[i][j] << " | ";
         }
         cout << endl;
-        cout << "      +---+---+---+---+---+---+---+---+---+" << endl;
-    }
-}
-bool isSafe(int grid[9][9], int row, int col, int num)
-{
-
-    // Row check
-    for (int i = 0; i < 9; i++)
-    {
-        if (grid[row][i] == num)
-            return false;
-    }
-
-    // Column check
-    for (int i = 0; i < 9; i++)
-    {
-        if (grid[i][col] == num)
-            return false;
-    }
-
-    // 3x3 Box check
-    int startRow = (row / 3) * 3;
-    int startCol = (col / 3) * 3;
-
-    for (int i = startRow; i < startRow + 3; i++)
-    {
-        for (int j = startCol; j < startCol + 3; j++)
+        if (i == 2 || i == 5 || i == 8)
         {
-            if (grid[i][j] == num)
-                return false;
+            cout << "------+-----------+-----------+-----------+" << endl;
         }
     }
+}
+
+//  Check if game complete
+bool isComplete(int grid[9][9])
+{
+    for (int i = 0; i < 9; i++)
+        for (int j = 0; j < 9; j++)
+            if (grid[i][j] == 0)
+                return false;
 
     return true;
 }
+
 int main()
 {
-
+    int row, col, num;
+    int moves = 5;
     int grid[9][9] = {
         {5, 3, 0, 0, 7, 0, 0, 0, 0},
         {6, 0, 0, 1, 9, 5, 0, 0, 0},
@@ -65,31 +100,76 @@ int main()
         {0, 0, 0, 4, 1, 9, 0, 0, 5},
         {0, 0, 0, 0, 8, 0, 0, 7, 9}};
 
-    cout << "Sudoku Grid:\n\n";
     printGrid(grid);
-    int row;
-    int column;
-    int num;
-    cout << "\n For inserting Number, please tell row number and coulmn number where do you want to add your number.";
-
     while (true)
     {
-        cout << "\n Enter row number : ";
-        cin >> row;
-        cout << "\n Enter Coulmn : ";
-        cin >> column;
-        cout << "\n Enter Number : ";
-        cin >> num;
-        if (isSafe(grid, row, column, num))
+        if (moves <= 0)
         {
-            grid[row][column] = num;
+            cout << "\n Game Over, You are run out of moves!";
+            break;
+        }
+        cout << "\nEnter Row (0-8): ";
+        cin >> row;
+        cout << "Enter Column (0-8): ";
+        cin >> col;
+        cout << "Enter Number (1-9): ";
+        cin >> num;
+
+        if (row < 0 || row > 8 || col < 0 || col > 8)
+        {
+            cout << "Invalid position!\n";
+            continue;
+        }
+
+        if (num < 1 || num > 9)
+        {
+            cout << "Invalid number!\n";
+            continue;
+        }
+        //  Prevent overwrite
+        if (grid[row][col] != 0)
+        {
+            cout << "Cell already filled!\n";
+            continue;
+        }
+
+        if (isSafe(grid, row, col, num))
+        {
+            grid[row][col] = num;
             printGrid(grid);
         }
         else
         {
-            cout << "\nNot Safe! Try again.";
+            moves--;
+            cout << "Invalid move!\n";
+            cout << "Moves left : " << moves<<endl ;
         }
 
-        return 0;
+        //  Check win
+        if (isComplete(grid))
+        {
+            cout << "\n🎉 Congratulations! You solved Sudoku!\n";
+            break;
+        }
+
+        int choice;
+        cout << "\nPress 1 for solution, 2 to continue: ";
+        cin >> choice;
+
+        if (choice == 1)
+        {
+            if (solveSudoku(grid))
+            {
+                cout << "\nSolved by system:\n";
+                printGrid(grid);
+            }
+            else
+            {
+                cout << "No solution exists!";
+            }
+            break;
+        }
     }
+
+    return 0;
 }
