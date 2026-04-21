@@ -99,7 +99,15 @@ int main()
         {0, 6, 0, 0, 0, 0, 2, 8, 0},
         {0, 0, 0, 4, 1, 9, 0, 0, 5},
         {0, 0, 0, 0, 8, 0, 0, 7, 9}};
+    int newGrid[9][9];
 
+    for (int i = 0; i < 9; i++)
+    {
+        for (int j = 0; j < 9; j++)
+        {
+            newGrid[i][j] = grid[i][j];
+        }
+    }
     printGrid(grid);
     while (true)
     {
@@ -142,7 +150,7 @@ int main()
         {
             moves--;
             cout << "Invalid move!\n";
-            cout << "Moves left : " << moves<<endl ;
+            cout << "Moves left : " << moves << endl;
         }
 
         //  Check win
@@ -158,10 +166,10 @@ int main()
 
         if (choice == 1)
         {
-            if (solveSudoku(grid))
+            if (solveSudoku(newGrid))
             {
                 cout << "\nSolved by system:\n";
-                printGrid(grid);
+                printGrid(newGrid);
             }
             else
             {
